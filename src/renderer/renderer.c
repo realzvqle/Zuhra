@@ -5,9 +5,13 @@
 
 
 thrd_t thread;
+extern state* stte;
+
+int idk = 0;
 
 int start_renderer(state* state, lua_State* L, requestData* data){
     if(!data->init){
+        
         //data->result = NULL;
         data->status = -1;
          if (thrd_create(&thread, fetch_lua_script, (void*)data) != thrd_success) {
@@ -26,6 +30,9 @@ int start_renderer(state* state, lua_State* L, requestData* data){
     if (thrd_join(thread, NULL) == thrd_success) {
         if (data->status == 0) {
             if (data->result != NULL) {
+TRYAGAIN:
+                ClearBackground(stte->backgroundColor);
+
                 int result = luaL_loadstring(L, data->result);
                 int presult = lua_pcall(L, 0, 0, 0);                     
                 if (result != LUA_OK || presult != LUA_OK) {
@@ -57,7 +64,6 @@ int start_renderer(state* state, lua_State* L, requestData* data){
 }
 
 
-extern state* stte;
 
 
 Color create_color(int r, int g, int b, int a){

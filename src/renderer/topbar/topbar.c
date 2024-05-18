@@ -15,6 +15,7 @@ void draw_topbar(){
 
     if(button == BUTTON_CLICK_LEFT){
         data->init = FALSE;
+        data->shouldLoad = FALSE;
         ClearBackground(WHITE);
         stte->backgroundColor = WHITE;
     }
