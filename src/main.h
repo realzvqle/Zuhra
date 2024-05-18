@@ -43,6 +43,8 @@ typedef struct _state{
     bool isLoaded;
     Color backgroundColor;
     char* currentFile;
+    char buffer[512];
+    bool reload;
 } state;
 
 

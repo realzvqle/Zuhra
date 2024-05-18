@@ -12,6 +12,8 @@ typedef struct _requestData{
     char* result;
     char* url;
     int status;
+    bool init;
+    bool shouldLoad;
 } requestData;
 
 

@@ -1,12 +1,14 @@
 #include "input.h"
-
-
+#include "drawtext.h"
+extern state* stte;
 
 
 void draw_text_box(Rectangle box, char *text, int maxLength, bool *active, Color textColor) {
     box.y = box.y - 90;
-    DrawRectangleLines(box.x, box.y, box.width, box.height, *active ? RED : GRAY);
-    DrawText(text, box.x + 5, box.y + 8, 20, textColor);
+    DrawRectangle(box.x, box.y, box.width, box.height, *active ? WHITE : GRAY);
+    DrawRectangleLines(box.x + 1, box.y + 1, box.width + 1, box.height + 1, *active ? BLACK : DARKGRAY);
+
+    draw_text(text, box.x + 5, box.y + 8, 20, textColor);
     if (CheckCollisionPointRec(GetMousePosition(), box) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         *active = true;
     } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -39,7 +41,7 @@ void draw_text_box(Rectangle box, char *text, int maxLength, bool *active, Color
             int cursorX = box.x + 5 + textWidth;
             int cursorY = box.y + 8;
             if ((GetTime() * 2.0f) - (int)(GetTime() * 2.0f) > 0.5f) {
-                DrawText("_", cursorX, cursorY, 20, BLACK);
+                draw_text("    _", cursorX, cursorY, 20, BLACK);
             }
         }
     }

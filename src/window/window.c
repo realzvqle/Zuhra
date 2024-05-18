@@ -3,12 +3,11 @@
 #include "../renderer/properties/drawtext.h"
 #include "../renderer/properties/shapes.h"
 #include "../renderer/renderer.h"
-#include "../renderer/topbar/topbar.h"
 #include "../networking/request.h"
 
 window* win;
 state* stte;
-
+requestData* data;
 static window* setup_window(){
     window* win = (window*)malloc(sizeof(window));
     if(!win){
@@ -22,28 +21,17 @@ static window* setup_window(){
     return win;
 }
 
+
 void create_window() {
     naettInit(NULL);
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-
-    requestData* data = (requestData*)malloc(sizeof(requestData));
-    if (data == NULL) {
-        fail("Failed to allocate memory for requestData\n");
-        return;
-    }
-    data->url = NULL;
-    data->result = NULL;
-    data->status = -1;
-
-    // Register Lua functions
     lua_register(L, "draw_button", lua_draw_button);
     lua_register(L, "draw_text", lua_draw_text);
     lua_register(L, "draw_rect", lua_draw_rect);
     lua_register(L, "draw_circle", lua_draw_circle);
     lua_register(L, "create_color", lua_create_color);
     lua_register(L, "change_background", lua_change_background);
-
     stte = (state*)malloc(sizeof(state));
     if (stte == NULL) {
         fail("Failed to allocate memory for state\n");
@@ -70,55 +58,24 @@ void create_window() {
     }
     pass("Loaded Font\n");
 
-    stte->currentFile = "realzvqle.github.io/test/IDK.LUA";
+    stte->currentFile = "realzvqle.github.io/test/SCRIPT.LUA";
 
-    char buffer[998];
-    sprintf(buffer, "https://%s", stte->currentFile);
-    data->url = strdup(buffer);
-    info("%s\n", data->url);
+    data = (requestData*)malloc(sizeof(requestData));
+    data->init = false;
     thrd_t thread;
     if (thrd_create(&thread, fetch_lua_script, (void*)data) != thrd_success) {
         fail("Failed to create fetch thread\n");
         return;
     }
-
+    stte->reload = true;
     while (!WindowShouldClose()) {
-        char buffer[998];
-        sprintf(buffer, "https://%s", stte->currentFile);
-        data->url = strdup(buffer);
-        ClearBackground(BLACK);
+        sprintf(stte->buffer, "https://%s", stte->currentFile);
+        data->url = strdup(stte->buffer);
         info("FPS is currently %d\n[!] Window Size is (x=%d, y=%d)\n", GetFPS(), GetScreenWidth(), GetScreenHeight());
         BeginDrawing();
-        draw_topbar();
+        start_renderer(stte, L, data);
 
-        if (thrd_join(thread, NULL) == thrd_success) {
-            if (data->status == 0) {
-                if (data->result != NULL) {
-                    int result = luaL_loadstring(L, data->result);
-                    int presult = lua_pcall(L, 0, 0, 0);
-                    
-                    if (result != LUA_OK || presult != LUA_OK) {
-                         ClearBackground(BLACK);
-                        fail("Failed Compiling Lua File\n");
-                        lua_pop(L, 1);
-                    }
-                    else{
-                        ClearBackground(stte->backgroundColor);
-                        stte->backgroundColor = BLACK;
-
-                    }
-                    free(data->result);  
-                    data->result = NULL;
-                }
-            } else {
-                ClearBackground(BLACK);
-                stte->backgroundColor = BLACK;
-                fail("Failed to fetch Lua script\n");
-            }
-            data->status = -1;
-            thrd_create(&thread, fetch_lua_script, (void*)data);
-        }
-
+       // ClearBackground(BLACK);
         EndDrawing();
     }
 

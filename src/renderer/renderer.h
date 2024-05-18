@@ -4,8 +4,8 @@
 
 
 #include "../main.h"
-
-//int start_renderer(state* state);
+#include "../networking/request.h"
+int start_renderer(state* state, lua_State* L, requestData* data);
 int lua_create_color(lua_State* L);
 Color create_color(int r, int g, int b, int a);
 

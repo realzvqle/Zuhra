@@ -5,6 +5,12 @@
 
 int fetch_lua_script(void* args) {
     requestData* data = (requestData*)args;
+    if(!data->shouldLoad){
+        data->status = 0;
+
+        return 0;
+
+    }
     if(data->url == NULL){
         fail("Failed At Point 1");
         data->result =  "local color = change_color(255, 0,0,255)\ndraw_text(\"Error\", 10, 10, 255, color)";
@@ -37,6 +43,7 @@ int fetch_lua_script(void* args) {
     naettFree(req);
     data->result = strdup(body);
     pass("%s\n", data->result);
-    data->status = 00;
+    data->status = 0;
+    data->shouldLoad = false;
     return 0;
 }

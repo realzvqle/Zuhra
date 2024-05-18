@@ -1,14 +1,60 @@
+
 #include "renderer.h"
+#include "topbar/topbar.h"
+#include "../networking/request.h"
 
 
+thrd_t thread;
 
-
-// int start_renderer(state* state){
-
-
-
-//     return 0;
-// }
+int start_renderer(state* state, lua_State* L, requestData* data){
+    if(!data->init){
+        //data->result = NULL;
+        data->status = -1;
+         if (thrd_create(&thread, fetch_lua_script, (void*)data) != thrd_success) {
+            fail("Failed to create fetch thread\n");
+            return 1;
+         }
+        data->shouldLoad = true;
+        data->init = TRUE;
+    }
+    draw_topbar();
+    if (data == NULL) {
+        fail("Failed to allocate memory for requestData\n");
+        return 0;
+    } 
+       
+    if (thrd_join(thread, NULL) == thrd_success) {
+        if (data->status == 0) {
+            if (data->result != NULL) {
+                int result = luaL_loadstring(L, data->result);
+                int presult = lua_pcall(L, 0, 0, 0);                     
+                if (result != LUA_OK || presult != LUA_OK) {
+                    ClearBackground(BLACK);
+                    fail("Failed Compiling Lua File\n");
+                    lua_pop(L, 1);
+                }         
+                else{
+                    ClearBackground(state->backgroundColor);
+                    //state->backgroundColor = BLACK;
+                    state->reload = false;
+                }
+                //free(data->result);  
+                //data->result = NULL;
+                }
+                } else {
+                    ClearBackground(BLACK);
+                    state->backgroundColor = BLACK;
+                    fail("Failed to fetch Lua script\n");
+                }
+                data->status = -1;
+                thrd_create(&thread, fetch_lua_script, (void*)data);
+    }
+    else{
+        fail("Failed Making Trhead\n");
+    }          
+    info("%s\n", data->url);
+    return 0;
+}
 
 
 extern state* stte;
